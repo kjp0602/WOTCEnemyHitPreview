@@ -1,0 +1,30 @@
+# ModBuddy / XCOM 2 Mod Project
+
+# User-specific files
+*.XCOM_suo
+*.user
+
+# Build results
+[Bb]in/
+[Oo]bj/
+[Dd]ebug/
+[Rr]elease/
+
+# Mod build output
+*.u
+*.upk
+Script/
+
+# ModBuddy cache
+.vs/
+*.cache
+
+# Backup files
+*.bak
+*~
+
+# OS generated files
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+.DS_Store
