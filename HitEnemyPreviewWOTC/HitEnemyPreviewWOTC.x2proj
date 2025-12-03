@@ -12,9 +12,13 @@
   <ItemGroup>
     <Content Include="Config\XComEditor.ini" />
     <Content Include="Config\XComEngine.ini" />
+    <Content Include="Config\XComEnemyHitPreview.ini" />
     <Content Include="ModPreview.jpg" />
     <Content Include="ReadMe.txt" />
     <Content Include="Src\WOTCEnemyHitPreview\Classes\EnemyHitPreview.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\WOTCEnemyHitPreview\Classes\EnemyHitPreview_Config.uc">
       <SubType>Content</SubType>
     </Content>
   </ItemGroup>

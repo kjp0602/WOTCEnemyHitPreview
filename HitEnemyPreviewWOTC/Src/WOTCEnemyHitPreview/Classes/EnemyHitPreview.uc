@@ -285,10 +285,13 @@ simulated function CalculateVisibleEnemiesFromTile(TTile FromTile, int SourceUni
 	local XComGameStateHistory History;
 	local StateObjectReference UnitRef;
 	local XComGameState_Unit EnemyUnit;
+	local XComGameState_Unit SourceUnit;
 	local GameRulesCache_VisibilityInfo VisInfo;
+	local GameRulesCache_VisibilityInfo CurrentVisInfo;
 
 	History = `XCOMHISTORY;
 	VisibilityMgr = `TACTICALRULES.VisibilityMgr;
+	SourceUnit = XComGameState_Unit(History.GetGameStateForObjectID(SourceUnitID));
 
 	m_arrTargets.Length = 0;
 	m_arrCurrentlyAffectable.Length = 0;
@@ -297,8 +300,19 @@ simulated function CalculateVisibleEnemiesFromTile(TTile FromTile, int SourceUni
 	// Get all enemy units
 	foreach History.IterateByClassType(class'XComGameState_Unit', EnemyUnit)
 	{
-		if (EnemyUnit.IsAlive() && EnemyUnit.IsEnemyUnit(XComGameState_Unit(History.GetGameStateForObjectID(SourceUnitID))))
+		if (EnemyUnit.IsAlive() && EnemyUnit.IsEnemyUnit(SourceUnit))
 		{
+			// Skip unrevealed enemies if option is enabled
+			if (class'EnemyHitPreview_Config'.default.bHideUnrevealedEnemies)
+			{
+				// Check if enemy is visible to any squad member (not just the active unit)
+				if (!class'X2TacticalVisibilityHelpers'.static.CanXComSquadSeeTarget(EnemyUnit.ObjectID))
+				{
+					// Enemy not visible to squad, skip
+					continue;
+				}
+			}
+
 			UnitRef.ObjectID = EnemyUnit.ObjectID;
 
 			// Check visibility from the specified tile
