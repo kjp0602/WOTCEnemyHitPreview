@@ -80,9 +80,15 @@ simulated function int GetHitChanceFromPreviewTile(StateObjectReference TargetRe
 	local int CoverBonus;
 	local int RangeModifier;
 	local int TileDistance;
+	local int HeightAdvantage;
+	local int WeaponUpgradeBonus;
+	local int HeightTileDifference;
 	local vector ShooterLoc, TargetLoc;
 	local float Distance;
 	local X2WeaponTemplate WeaponTemplate;
+	local array<X2WeaponUpgradeTemplate> WeaponUpgrades;
+	local X2WeaponUpgradeTemplate UpgradeTemplate;
+	local int i;
 
 	History = `XCOMHISTORY;
 	ShooterState = XComGameState_Unit(History.GetGameStateForObjectID(PreviewSourceUnitID));
@@ -102,7 +108,7 @@ simulated function int GetHitChanceFromPreviewTile(StateObjectReference TargetRe
 
 	WeaponTemplate = X2WeaponTemplate(WeaponState.GetMyTemplate());
 
-	// Base aim from shooter
+	// Base aim from shooter (includes PCS and passive ability bonuses)
 	ShooterAim = ShooterState.GetCurrentStat(eStat_Offense);
 
 	// Target defense
@@ -141,9 +147,35 @@ simulated function int GetHitChanceFromPreviewTile(StateObjectReference TargetRe
 			RangeModifier = WeaponTemplate.RangeAccuracy[WeaponTemplate.RangeAccuracy.Length - 1];
 	}
 
+	// Height advantage bonus using game's configured values from X2TacticalGameRuleset
+	// Calculate height difference in tiles (WORLD_FloorHeight = 1 floor/tile height)
+	HeightAdvantage = 0;
+	HeightTileDifference = int((ShooterLoc.Z - TargetLoc.Z) / class'XComWorldData'.const.WORLD_FloorHeight);
+	if (HeightTileDifference >= class'X2TacticalGameRuleset'.default.UnitHeightAdvantage)
+	{
+		// Shooter has height advantage over target
+		HeightAdvantage = class'X2TacticalGameRuleset'.default.UnitHeightAdvantageBonus;
+	}
+	else if (HeightTileDifference <= -class'X2TacticalGameRuleset'.default.UnitHeightAdvantage)
+	{
+		// Target has height advantage over shooter (shooter at disadvantage)
+		HeightAdvantage = class'X2TacticalGameRuleset'.default.UnitHeightDisadvantagePenalty;
+	}
+
+	// Weapon upgrade bonuses (scope, laser sight, etc.)
+	WeaponUpgradeBonus = 0;
+	WeaponUpgrades = WeaponState.GetMyWeaponUpgradeTemplates();
+	for (i = 0; i < WeaponUpgrades.Length; i++)
+	{
+		UpgradeTemplate = WeaponUpgrades[i];
+		if (UpgradeTemplate != none)
+		{
+			WeaponUpgradeBonus += UpgradeTemplate.AimBonus;
+		}
+	}
+
 	// Calculate final hit chance
-	// Hit = Aim - Defense - Cover + WeaponAim + RangeModifier
-	HitChance = ShooterAim - TargetDefense - CoverBonus + WeaponState.GetItemAimModifier() + RangeModifier;
+	HitChance = ShooterAim - TargetDefense - CoverBonus + WeaponState.GetItemAimModifier() + RangeModifier + HeightAdvantage + WeaponUpgradeBonus;
 
 	// Flanking bonus (target has no cover from this position)
 	if (ShooterState.CanFlank() && TargetState.CanTakeCover() && VisInfo.TargetCover == CT_None)
@@ -287,7 +319,6 @@ simulated function CalculateVisibleEnemiesFromTile(TTile FromTile, int SourceUni
 	local XComGameState_Unit EnemyUnit;
 	local XComGameState_Unit SourceUnit;
 	local GameRulesCache_VisibilityInfo VisInfo;
-	local GameRulesCache_VisibilityInfo CurrentVisInfo;
 
 	History = `XCOMHISTORY;
 	VisibilityMgr = `TACTICALRULES.VisibilityMgr;
