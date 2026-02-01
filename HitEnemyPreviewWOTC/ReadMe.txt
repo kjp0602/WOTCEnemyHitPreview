@@ -12,6 +12,9 @@ Configuration (XComEnemyHitPreview.ini):
 - bHideUnrevealedEnemies=false : Show all enemies including unrevealed ones
 
 Changelog:
+v1.3
+- Removed all debug log statements for cleaner performance
+
 v1.2
 - Improved hit chance calculation accuracy
 - Height bonus calculation fix (now uses X2TacticalGameRuleset configured values)
@@ -43,6 +46,9 @@ v1.0
 - bHideUnrevealedEnemies=false : 발견되지 않은 적 포함 모든 적 표시
 
 변경사항:
+v1.3
+- 성능 향상을 위한 모든 디버그 로그 제거
+
 v1.2
 - 명중률 계산 정확도 개선
 - 높이 보너스 계산 수정 (X2TacticalGameRuleset 설정값 사용)

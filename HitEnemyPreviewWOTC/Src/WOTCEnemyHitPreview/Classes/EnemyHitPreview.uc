@@ -24,13 +24,10 @@ simulated function OnInit()
 {
 	super.OnInit();
 
-	`log("HitEnemyPreview: OnInit called");
-
 	if (!bLabelsInitialized)
 	{
 		CreateHitChanceLabels();
 		bLabelsInitialized = true;
-		`log("HitEnemyPreview: Labels created, count=" $ HitChanceLabels.Length);
 	}
 }
 
@@ -59,8 +56,6 @@ simulated function UpdatePreviewTargets(GameplayTileData MoveToTileData, const o
 	// Store the preview tile for hit chance calculation
 	PreviewTile = MoveToTileData.EventTile;
 	PreviewSourceUnitID = MoveToTileData.SourceObjectID;
-
-	`log("HitEnemyPreview: UpdatePreviewTargets called, SourceID=" $ MoveToTileData.SourceObjectID $ " ObjectsVisible=" $ ObjectsVisibleToPlayer.Length);
 
 	// Call parent to do all the normal work
 	super.UpdatePreviewTargets(MoveToTileData, ObjectsVisibleToPlayer, HistoryIndex);
@@ -274,14 +269,12 @@ public function UpdateVisuals(int HistoryIndex)
 		if (EnemyUnit != none && i < HitChanceLabels.Length)
 		{
 			HitChance = GetHitChanceFromPreviewTile(m_arrTargets[i]);
-			`log("HitEnemyPreview: Target " $ i $ " HitChance=" $ HitChance);
 
 			if (HitChance >= 0)
 			{
 				ColorHex = class'UIUtilities_Colors'.static.GetHexColorFromState(Visualizer.GetMyHUDIconColor());
 				ColorHex = Right(ColorHex, Len(ColorHex) - 2);  // Remove "0x" prefix
 				HitChanceText = "<font size='18' color='#" $ ColorHex $ "'><b>" $ string(HitChance) $ "%</b></font>";
-				`log("HitEnemyPreview: HitChanceText=" $ HitChanceText);
 				HitChanceLabels[i].SetHTMLText(HitChanceText);
 				HitChanceLabels[i].Show();
 			}
@@ -359,15 +352,12 @@ simulated function CalculateVisibleEnemiesFromTile(TTile FromTile, int SourceUni
 					{
 						FlankedTargets.AddItem(UnitRef);
 					}
-
-					`log("HitEnemyPreview: Found visible enemy " $ EnemyUnit.ObjectID $ " from tile");
 				}
 			}
 		}
 	}
 
 	iNumVisibleEnemies = m_arrTargets.Length;
-	`log("HitEnemyPreview: CalculateVisibleEnemiesFromTile found " $ iNumVisibleEnemies $ " enemies");
 }
 
 // Override Show to always show when Alt is pressed (don't hide based on enemy count)
@@ -397,12 +387,10 @@ simulated function Show()
 				if (bGotCursorTile)
 				{
 					PreviewTile = CursorTile;
-					`log("HitEnemyPreview: Show() - using cursor tile");
 				}
 				else
 				{
 					PreviewTile = UnitState.TileLocation;
-					`log("HitEnemyPreview: Show() - using current position");
 				}
 
 				// Calculate visible enemies from the preview tile
